@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
-import { error } from 'console';
 
 interface Csavar{
   id: number;
@@ -11,18 +10,17 @@ interface Csavar{
   ar: number;
 }
 
-interface CsavarListResponse{
-  csavarok: Csavar[];
-}
-
 interface State{
-  csavarok: Csavar[] 
+  csavarok: Csavar[]; 
   tipusInput: string;
   hosszInput: number;
   arInput: number;
   keszletInput: number;
 }
 
+interface CsavarListResponse{
+  csavarok: Csavar[];
+}
 class App extends Component<{}, State>{
   constructor(props: {}){
     super(props);
@@ -37,11 +35,11 @@ class App extends Component<{}, State>{
   }
 
   async loadCsavarok() {
-    let response = await fetch('http://localhost:3000/api/csavarbolt');
-    let data = await response.json() as Csavar[];
+    let response = await fetch('http://localhost:3000/api/csavar');
+    let data = await response.json() as CsavarListResponse;
     console.log(data);
     this.setState({
-      csavarok: data, 
+      csavarok: data.csavarok, 
     })
   }
 
@@ -50,9 +48,9 @@ class App extends Component<{}, State>{
   }
 
   handleUpload = async () => {
-    const { tipusInput, hosszInput, arInput, keszletInput } = this.state;
-    if(tipusInput.trim() === '' || hosszInput<1 || arInput <1 || keszletInput<1){
-      this.setState(error)
+    const { tipusInput, hosszInput, keszletInput, arInput} = this.state;
+    if(tipusInput.trim() === '' || hosszInput<1 || keszletInput<1 || arInput <1 ){
+      //this.setState(error)
       return;
     }
 
@@ -61,9 +59,9 @@ class App extends Component<{}, State>{
       hossz: hosszInput,
       ar: arInput,
       keszlet: keszletInput,
-    }
+    };
 
-    let response = await fetch('http://localhost:3000/api/csavarbolt', {
+    let response = await fetch('http://localhost:3000/api/csavar', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -74,15 +72,30 @@ class App extends Component<{}, State>{
     this.setState({ 
       tipusInput: '',
       hosszInput: 0,
-      arInput: 0,
       keszletInput: 0,
+      arInput: 0,
     })
 
     await this.loadCsavarok();
   };
-
-
-
+  
+  render(){
+    const { tipusInput, hosszInput, keszletInput, arInput} = this.state;
+    return <div>
+    <h2>Új Csavar</h2>
+    Tipus: <input type='text' value={tipusInput} onChange={e => this.setState({ tipusInput: e.currentTarget.value})}></input><br/>
+    Hossz: <input type='number' value={hosszInput} onChange={e => this.setState({ hosszInput: parseInt(e.currentTarget.value) })}></input> <br/>
+    Készlet: <input type='number' value={keszletInput} onChange={e => this.setState({ keszletInput: parseInt(e.currentTarget.value) })}></input> <br/>
+    Ár: <input type='number' value={arInput} onChange={e => this.setState({ arInput: parseInt(e.currentTarget.value) })}></input> <br/>
+    <button onClick={this.handleUpload}>Hozzaad</button> <br />
+    <h2>Csavarok:</h2>
+    <ul>{
+          this.state.csavarok.map(csavar => 
+            <li>{csavar.tipus}, {csavar.hossz}cm, {csavar.ar}Ft, {csavar.keszlet}db,</li>
+          )
+        }</ul>        
+    </div>
+  }
 }
 
 export default App;
