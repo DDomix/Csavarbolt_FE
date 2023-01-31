@@ -35,7 +35,18 @@ class App extends Component<{}, State>{
     }
   }
 
-  
+  async loadCsavarok() {
+    let response = await fetch('http://localhost:3000/api/csavarbolt');
+    let data = await response.json() as Csavar[];
+    console.log(data);
+    this.setState({
+      csavarok: data, 
+    })
+  }
+
+  componentDidMount() {
+    this.loadCsavarok();
+  }
 
 }
 
